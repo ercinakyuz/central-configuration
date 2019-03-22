@@ -1,0 +1,60 @@
+﻿@model List<CentralConfiguration.Cms.Data.Entity.Configuration>
+
+@{
+    ViewBag.Title = "Configurations";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h5 class="pb-3"><i class="fa fa-file-o"></i> @ViewBag.Title</h5>
+
+
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>
+                Key
+            </th>
+            <th>
+                Value
+            </th>
+            <th>
+                Type
+            </th>
+            <th>
+                Application Name
+            </th>
+            <th>
+                <div class="pull-right">
+                    <a class="btn btn-sm btn-success" href="@Url.Action("Create","Configuration")"><i class="fa fa-plus"></i> Configuration</a>
+                </div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var config in Model)
+            {
+                <tr>
+                    <td>
+                        @config.Key
+                    </td>
+                    <td>
+                        @config.Value
+                    </td>
+                    <td>
+                        @config.Type
+                    </td>
+                    <td>
+                        @config.ApplicationName
+                    </td>
+                    <td class="pull-right">
+                        <a class="btn btn-sm btn-primary" href="@Url.Action("Edit",new{id=config.Id})"><i class="fa fa-pencil"></i></a>
+                        <a class="btn btn-sm btn-danger" href="@Url.Action("Delete",new{id=config.Id})" onclick="return confirm('@config.Key numaralı öğrenciyi silmek istediğinize emin misiniz?')"><i class="fa fa-trash"></i></a>
+                    </td>
+                </tr>
+            }
+        }
+
+    </tbody>
+</table>

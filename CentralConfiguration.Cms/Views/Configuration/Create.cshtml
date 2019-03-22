@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewBag.Title = "Add Config";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h5 class="pb-3"><i class="fa fa-file-o"></i> @ViewBag.Title</h5>
+
+<form method="post">
+    <div class="form-group row">
+        <label class="col-form-label col-2">Application Name</label>
+        <div class="col-10">
+            <input type="text" name="ApplicationName" class="form-control" placeholder="Application Name" required />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-form-label col-2">Key</label>
+        <div class="col-10">
+            <input type="text" name="Key" class="form-control" placeholder="Key" required />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-form-label col-2">Type</label>
+        <div class="col-2">
+            <select class="custom-select" id="ddlType" name="Type" required>
+                <option value="" selected>Select Type</option>
+                <option value="int">Integer</option>
+                <option value="string">String</option>
+                <option value="bool">Boolean</option>
+            </select>
+        </div>
+        <label class="col-form-label col-1">Value</label>
+        <div class="col-7">
+            <select class="custom-select" id="slcValue" name="Value" required>
+                <option value="" selected>Select Bool Value</option>
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </select>
+            <input type="text" class="form-control" id="txtValue" placeholder="Value" name="Value" required />
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-form-label col-2">Status</label>
+        <div class="col-10">
+            <div class="custom-control custom-checkbox">
+                <input class="custom-control-input" type="checkbox" id="chkIsActive" name="IsActive" value="true">
+                <label class="custom-control-label" for="chkIsActive">Is Active?</label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="offset-2 col-10">
+            <input type="submit" value="Submit" class="btn btn-success pull-right" />
+        </div>
+    </div>
+</form>
+
+@section CustomScript {
+
+    <script>initDdl();</script>
+}
+
+
+
+
