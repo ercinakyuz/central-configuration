@@ -1,7 +1,5 @@
 ﻿using CentralConfiguration.Core;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 
 namespace CentralConfiguration.ApiClient.Controllers
 {
@@ -11,15 +9,15 @@ namespace CentralConfiguration.ApiClient.Controllers
     {
         private readonly IConfigurationReader _configurationReader;
 
-        public ValuesController(IOptionsSnapshot<AppSettings> appSettingsSnapshot, IConfiguration configuration)
+        public ValuesController()
         {
-            _configurationReader = new ConfigurationReader(appSettingsSnapshot);
+            _configurationReader = new ConfigurationReader();
         }
         // GET api/values
         [HttpGet]
-        public ActionResult<string> Get(string key)
+        public IActionResult Get(string key)
         {
-            return _configurationReader.GetValue<string>(key);
+            return Content(_configurationReader.GetValue<string>(key));
         }
 
     }

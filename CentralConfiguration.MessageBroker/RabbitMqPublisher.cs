@@ -1,6 +1,8 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 
 namespace CentralConfiguration.MessageBroker
 {
@@ -8,17 +10,17 @@ namespace CentralConfiguration.MessageBroker
     {
         private readonly IConnection _connection;
 
-        public RabbitMqPublisher()
+        public RabbitMqPublisher(IConfiguration configuration)
         {
-            _connection = RabbitMqConnectionManager.GetRabbitMqConnection();
+            _connection = RabbitMqConnectionManager.GetRabbitMqConnection(configuration);
         }
 
-        public void SendModelToQueue(QueueDeclaration declaration, T model)
+        public void SendModelToQueue(T model, QueueDeclaration declaration, IBasicProperties properties = null)
         {
             using (var channel = _connection.CreateModel())
             {
                 channel.QueueDeclare(declaration.Name, declaration.IsDurable, declaration.IsExclusive, declaration.HasAutoDelete, declaration.Args);
-                channel.BasicPublish(string.Empty, declaration.Name, false, null, Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model)));
+                channel.BasicPublish(string.Empty, declaration.Name, false, properties, Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(model)));
             }
         }
     }

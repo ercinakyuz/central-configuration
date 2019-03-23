@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
@@ -6,31 +7,19 @@ namespace CentralConfiguration.MessageBroker
 {
     public class RabbitMqConsumer<T> : IConsumer<T>
     {
-        private IModel _channel;
-        private IConnection _connection;
+        private readonly IModel _channel;
 
-        public RabbitMqConsumer(string queueName)
+        public RabbitMqConsumer(IConfiguration configuration)
         {
-            Initialize(queueName);
+            var connection = RabbitMqConnectionManager.GetRabbitMqConnection(configuration);
+            _channel = connection.CreateModel();
         }
 
-        private void Initialize(string queueName)
-        {
-            _connection = RabbitMqConnectionManager.GetRabbitMqConnection();
-            _channel = _connection.CreateModel();
-
-            _channel.QueueDeclare(queue: queueName,
-                    durable: false,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null);
-
-        }
-
-        public T GetModelInQueue(string queueName)
+        public T GetModelInQueue(QueueDeclaration declaration)
         {
             var model = default(T);
-            var result = _channel.BasicGet(queueName, true);
+            _channel.QueueDeclare(declaration.Name, declaration.IsDurable, declaration.IsExclusive, declaration.HasAutoDelete, declaration.Args);
+            var result = _channel.BasicGet(declaration.Name, true);
             if (result != null)
             {
                 string data = Encoding.UTF8.GetString(result.Body);

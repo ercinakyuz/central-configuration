@@ -12,27 +12,28 @@ using Microsoft.Extensions.Hosting;
 
 namespace CentralConfiguration.Cms.Service
 {
-    internal class ConfigurationPublisherService : IHostedService, IDisposable
+    public class ConfigurationPublisherService : IHostedService, IDisposable
     {
         private readonly IPublisher<List<ConfigurationDto>> _publisher;
         private readonly IRepository<Configuration, string> _configurationRepository;
-        private readonly int _refreshTimeIntervalInSeconds;
+        private readonly int _publisherInterval;
         private Timer _timer;
+        private static readonly Dictionary<string, IList<ConfigurationDto>> _configurationsSnapShot = new Dictionary<string, IList<ConfigurationDto>>();
 
         public ConfigurationPublisherService(IRepository<Configuration, string> configurationRepository, IPublisher<List<ConfigurationDto>> publisher, IConfiguration configuration)
         {
             _publisher = publisher;
             _configurationRepository = configurationRepository;
-            if (!int.TryParse(configuration["ConfigurationPublisherService:RefreshTimeIntervalInSeconds"], out _refreshTimeIntervalInSeconds))
+            if (!int.TryParse(configuration["RabbitMqConnection:PublisherInterval"], out _publisherInterval))
             {
-                _refreshTimeIntervalInSeconds = 10;
+                _publisherInterval = 10;
             }
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _timer = new Timer(PublishQueue, null, TimeSpan.Zero,
-                TimeSpan.FromSeconds(_refreshTimeIntervalInSeconds));
+                TimeSpan.FromSeconds(_publisherInterval));
             return Task.CompletedTask;
         }
 
@@ -53,11 +54,21 @@ namespace CentralConfiguration.Cms.Service
                 {
                     Name = configurationGroup.Key,
                 };
-                //if (!queueDeclaration.Args.ContainsKey("x-expires"))
+                //PublisherProperties properties = new PublisherProperties
                 //{
-                //    queueDeclaration.Args.Add("x-expires", 1000 * _refreshTimeIntervalInSeconds);
-                //}               
-                _publisher.SendModelToQueue(queueDeclaration, configurationsToQueue);
+                //    Expiration = $"{1000 * _publisherInterval}"
+                //};
+
+                if (_configurationsSnapShot.ContainsKey(queueDeclaration.Name) && !configurationsToQueue.SequenceEqual(_configurationsSnapShot[queueDeclaration.Name]))
+                {
+                    _publisher.SendModelToQueue(configurationsToQueue, queueDeclaration);
+                }
+                else if (!_configurationsSnapShot.ContainsKey(queueDeclaration.Name))
+                {
+                    _publisher.SendModelToQueue(configurationsToQueue, queueDeclaration);
+                }
+                _configurationsSnapShot[queueDeclaration.Name] = configurationsToQueue;
+
             }
         }
 

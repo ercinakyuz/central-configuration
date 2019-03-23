@@ -2,9 +2,9 @@
 {
     public abstract class BaseDto
     {
-        public object Clone()
+        public BaseDto Clone()
         {
-            return MemberwiseClone();
+            return MemberwiseClone() as BaseDto;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,28 +8,28 @@ using CentralConfiguration.MessageBroker;
 using CentralConfiguration.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace CentralConfiguration.Core
 {
     public class ConfigurationConsumerService : IHostedService, IDisposable
     {
+        public static ConfigurationConsumerContext Context = new ConfigurationConsumerContext();
         private readonly int _consumerInterval;
         private readonly string _applicationName;
-        public static IList<ConfigurationDto> CurrentConfigurations;
-        private IList<ConfigurationDto> _configurationsSnapshot;
+        private readonly string _localSettingsPath;
         private Timer _timer;
+        private readonly IConsumer<IList<ConfigurationDto>> _consumer;
 
-        public ConfigurationConsumerService(IConfiguration configuration,IOptionsSnapshot<BaseAppSettings> options)
+        public ConfigurationConsumerService(IConfiguration configuration, IConsumer<IList<ConfigurationDto>> consumer)
         {
-            _applicationName = configuration["StaticSettings:ApplicationName"];
-            if (!int.TryParse(configuration["StaticSettings:ConsumerInterval"], out _consumerInterval))
+            _consumer = consumer;
+            _applicationName = configuration["AppSettings:ApplicationName"];
+            _localSettingsPath = configuration["AppSettings:LocalSettingsPath"];
+            if (!int.TryParse(configuration["RabbitMqConnection:ConsumerInterval"], out _consumerInterval))
             {
                 _consumerInterval = 10;
             }
-            //var staticSettings = options.Value.StaticSettings;
-            //_consumerInterval = staticSettings.ConsumerInterval;
-            //_applicationName = staticSettings.ApplicationName;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -40,16 +41,20 @@ namespace CentralConfiguration.Core
 
         private void ConsumeQueue(object state)
         {
-            var consumer = new RabbitMqConsumer<List<ConfigurationDto>>(_applicationName);
-            var model = consumer.GetModelInQueue(_applicationName);
+            var queueDeclaration = new QueueDeclaration
+            {
+                Name = _applicationName,
+            };
+            var model = _consumer.GetModelInQueue(queueDeclaration);
             if (model != null && model.Any())
             {
-                _configurationsSnapshot = model;
-                CurrentConfigurations = model;
+                Context.CurrentConfigurations = model.Select(x => x.Clone() as ConfigurationDto).ToList();
+                SerializeToFile(_localSettingsPath, new LocalSettings { Configurations = model });
             }
             else
             {
-                CurrentConfigurations = _configurationsSnapshot?.Select(x => x.Clone() as ConfigurationDto).ToList();
+                var localSettings = DeserializeFileContent<LocalSettings>(_localSettingsPath);
+                Context.CurrentConfigurations = localSettings?.Configurations?.Select(x => x.Clone() as ConfigurationDto).ToList();
             }
         }
 
@@ -64,5 +69,20 @@ namespace CentralConfiguration.Core
         {
             _timer?.Dispose();
         }
+
+        private T DeserializeFileContent<T>(string filePath)
+        {
+            var settingsString = File.ReadAllText(filePath);
+            return JsonConvert.DeserializeObject<T>(settingsString);
+        }
+
+        private void SerializeToFile<T>(string filePath, T model)
+        {
+            var content = JsonConvert.SerializeObject(model);
+            File.WriteAllText(filePath, content);
+        }
+
     }
+
+
 }

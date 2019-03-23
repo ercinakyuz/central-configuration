@@ -2,6 +2,6 @@
 {
     public interface IConsumer<out T>
     {
-        T GetModelInQueue(string queueName);
+        T GetModelInQueue(QueueDeclaration declaration);
     }
 }

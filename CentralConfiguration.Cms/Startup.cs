@@ -22,24 +22,14 @@ namespace CentralConfiguration.Cms
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddDistributedMemoryCache();
             services.AddSession();
 
-            services.AddTransient(typeof(IRepository<,>), typeof(BaseMongoRepository<,>));
-            services.AddTransient(typeof(IPublisher<>), typeof(RabbitMqPublisher<>));
+            services.AddSingleton(typeof(IRepository<,>), typeof(BaseMongoRepository<,>));
+            services.AddSingleton(typeof(IPublisher<>), typeof(RabbitMqPublisher<>));
             services.AddHostedService<ConfigurationPublisherService>();
             
-            //ervices.AddTransient(typeof(IPublisher<>), typeof(RabbitMqPublisher<>));
-
-
-            //services.AddSession(options =>
-            //{
-            //    // Set a short timeout for easy testing.
-            //    options.IdleTimeout = TimeSpan.FromSeconds(10);
-            //    options.Cookie.HttpOnly = true;
-            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

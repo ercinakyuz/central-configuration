@@ -15,19 +15,19 @@
             if (ddlType.val() === "bool") {
                 slcValue.show();
                 txtValue.hide();
-                slcValue.prop("required", true);
-                txtValue.removeProp("required");
+                slcValue.attr("required", "required");
+                txtValue.removeAttr("required");
                 txtValue.prop("disabled", true);
-                slcValue.removeProp("disabled");
+                slcValue.prop("disabled",false);
                 txtValue.val("");
             } else {
 
                 slcValue.hide();
                 txtValue.show();
-                txtValue.prop("required", true);
-                slcValue.removeProp("required");
+                txtValue.attr("required", true);
+                slcValue.removeAttr("required");
                 slcValue.prop("disabled", true);
-                txtValue.removeProp("disabled");
+                txtValue.prop("disabled",false);
                 slcValue.val("");
             }
         }
