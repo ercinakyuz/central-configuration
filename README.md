@@ -1,2 +1,1 @@
 # central-configuration
-test
