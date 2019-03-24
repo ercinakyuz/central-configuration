@@ -45,16 +45,23 @@ namespace CentralConfiguration.Core
             {
                 Name = _applicationName,
             };
-            var model = _consumer.GetModelInQueue(queueDeclaration);
-            if (model != null && model.Any())
+            try
             {
-                Context.CurrentConfigurations = model.Select(x => x.Clone() as ConfigurationDto).ToList();
-                SerializeToFile(_localSettingsPath, new LocalSettings { Configurations = model });
+                var model = _consumer.GetModelInQueue(queueDeclaration);
+                if (model != null && model.Any())
+                {
+                    Context.CurrentConfigurations = model.Select(x => x.Clone() as ConfigurationDto).ToList();
+                    SerializeToFile(_localSettingsPath, new LocalSettings { Configurations = model });
+                }
+                else
+                {
+                    var localSettings = DeserializeFileContent<LocalSettings>(_localSettingsPath);
+                    Context.CurrentConfigurations = localSettings?.Configurations?.Select(x => x.Clone() as ConfigurationDto).ToList();
+                }
             }
-            else
+            catch (Exception e)
             {
-                var localSettings = DeserializeFileContent<LocalSettings>(_localSettingsPath);
-                Context.CurrentConfigurations = localSettings?.Configurations?.Select(x => x.Clone() as ConfigurationDto).ToList();
+                Console.WriteLine(e);
             }
         }
 

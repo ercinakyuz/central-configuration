@@ -1,5 +1,6 @@
 ﻿using CentralConfiguration.Core;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace CentralConfiguration.ApiClient.Controllers
 {
@@ -13,11 +14,24 @@ namespace CentralConfiguration.ApiClient.Controllers
         {
             _configurationReader = new ConfigurationReader();
         }
-        // GET api/values
         [HttpGet]
-        public IActionResult Get(string key)
+        public ActionResult Get(string key, string type)
         {
-            return Content(_configurationReader.GetValue<string>(key));
+            dynamic value = null;
+            if (type == "string")
+            {
+                value = _configurationReader.GetValue<string>(key);
+            }
+            else if (type == "bool")
+            {
+                value = _configurationReader.GetValue<bool>(key);
+            }
+            else if (type == "int")
+            {
+                value = _configurationReader.GetValue<int>(key);
+            }
+
+            return Ok(value);
         }
 
     }

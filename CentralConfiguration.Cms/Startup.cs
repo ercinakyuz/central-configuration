@@ -25,7 +25,6 @@ namespace CentralConfiguration.Cms
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddDistributedMemoryCache();
             services.AddSession();
-
             services.AddSingleton(typeof(IRepository<,>), typeof(BaseMongoRepository<,>));
             services.AddSingleton(typeof(IPublisher<>), typeof(RabbitMqPublisher<>));
             services.AddHostedService<ConfigurationPublisherService>();
