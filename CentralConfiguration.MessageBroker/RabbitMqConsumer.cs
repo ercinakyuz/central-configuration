@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 
@@ -8,10 +7,11 @@ namespace CentralConfiguration.MessageBroker
     public class RabbitMqConsumer<T> : IConsumer<T>
     {
         private readonly IModel _channel;
+        public string Host { get; set; }
 
-        public RabbitMqConsumer(IConfiguration configuration)
+        public RabbitMqConsumer()
         {
-            var connection = RabbitMqConnectionManager.GetRabbitMqConnection(configuration);
+            var connection = RabbitMqConnectionManager.GetRabbitMqConnection(Host);
             _channel = connection.CreateModel();
         }
 

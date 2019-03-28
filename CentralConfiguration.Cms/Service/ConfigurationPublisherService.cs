@@ -9,21 +9,21 @@ using CentralConfiguration.MessageBroker;
 using CentralConfiguration.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace CentralConfiguration.Cms.Service
 {
     public class ConfigurationPublisherService : IHostedService, IDisposable
     {
-        private readonly IPublisher<List<ConfigurationDto>> _publisher;
+        private readonly IPublisher<IList<ConfigurationDto>> _publisher;
         private readonly IRepository<Configuration, string> _configurationRepository;
         private readonly int _publisherInterval;
         private Timer _timer;
-        private static readonly Dictionary<string, IList<ConfigurationDto>> ConfigurationsSnapShot = new Dictionary<string, IList<ConfigurationDto>>();
+        public static IDictionary<string, IList<ConfigurationDto>> ConfigurationsSnapShot { get; set; }
 
-        public ConfigurationPublisherService(IRepository<Configuration, string> configurationRepository, IPublisher<List<ConfigurationDto>> publisher, IConfiguration configuration)
+        public ConfigurationPublisherService(IRepository<Configuration, string> configurationRepository, IPublisher<IList<ConfigurationDto>> publisher, IConfiguration configuration)
         {
             _publisher = publisher;
+            _publisher.Host = configuration["RabbitMqConnection:Host"];
             _configurationRepository = configurationRepository;
             if (!int.TryParse(configuration["RabbitMqConnection:PublisherInterval"], out _publisherInterval))
             {
@@ -61,18 +61,21 @@ namespace CentralConfiguration.Cms.Service
                     //{
                     //    Expiration = $"{1000 * _publisherInterval}"
                     //};
-
-                    if (ConfigurationsSnapShot.ContainsKey(queueDeclaration.Name) &&
-                        !configurationsToQueue.SequenceEqual(ConfigurationsSnapShot[queueDeclaration.Name]))
+                    if (ConfigurationsSnapShot != null)
                     {
-                        _publisher.SendModelToQueue(configurationsToQueue, queueDeclaration);
+                        if ((ConfigurationsSnapShot.ContainsKey(queueDeclaration.Name) && !configurationsToQueue.SequenceEqual(ConfigurationsSnapShot[queueDeclaration.Name]))
+                            || !ConfigurationsSnapShot.ContainsKey(queueDeclaration.Name))
+                        {
+                            ConfigurationsSnapShot[queueDeclaration.Name] = configurationsToQueue.Select(x => x.Clone() as ConfigurationDto).ToList();
+                            _publisher.SendModelToQueue(configurationsToQueue, queueDeclaration);
+                        }
+                        
                     }
-                    else if (!ConfigurationsSnapShot.ContainsKey(queueDeclaration.Name))
+                    else
                     {
-                        _publisher.SendModelToQueue(configurationsToQueue, queueDeclaration);
+                        ConfigurationsSnapShot = new Dictionary<string, IList<ConfigurationDto>>();
                     }
 
-                    ConfigurationsSnapShot[queueDeclaration.Name] = configurationsToQueue;
 
                 }
             }

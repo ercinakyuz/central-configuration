@@ -8,12 +8,13 @@ namespace CentralConfiguration.MessageBroker
 {
     public class RabbitMqPublisher<T> : IPublisher<T>
     {
+        public string Host { get; set; }
         private readonly IConnection _connection;
 
-        public RabbitMqPublisher(IConfiguration configuration)
+        public RabbitMqPublisher()
         {
-            _connection = RabbitMqConnectionManager.GetRabbitMqConnection(configuration);
-        }
+            _connection = RabbitMqConnectionManager.GetRabbitMqConnection(Host);
+        }      
 
         public void SendModelToQueue(T model, QueueDeclaration declaration, IBasicProperties properties = null)
         {

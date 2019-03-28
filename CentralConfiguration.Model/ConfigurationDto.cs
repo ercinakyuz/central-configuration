@@ -13,7 +13,7 @@ namespace CentralConfiguration.Model
             if (other is null)
                 return false;
 
-            return Key == other.Key && Value == other.Value && Type == other.Type;
+            return Key.Equals(other.Key) && Value.Equals(other.Value) && Type.Equals(other.Type);
         }
 
         public override bool Equals(object obj) => Equals(obj as ConfigurationDto);

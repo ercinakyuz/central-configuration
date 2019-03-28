@@ -1,5 +1,7 @@
-﻿using CentralConfiguration.Core;
+﻿using System;
+using CentralConfiguration.Core;
 using CentralConfiguration.MessageBroker;
+using CentralConfiguration.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +24,14 @@ namespace CentralConfiguration.ApiClient
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddSingleton(typeof(IConsumer<>), typeof(RabbitMqConsumer<>));
-            services.AddHostedService<ConfigurationConsumerService>();
+            services.AddSingleton(new ConsumerSettings
+            {
+                ConsumerHost = Configuration["RabbitMqConnection:Host"],
+                ApplicationName = Configuration["AppSettings:ApplicationName"],
+                LocalSettingsPath = Configuration["AppSettings:LocalSettingsPath"],
+                ConsumerInterval = int.TryParse(Configuration["RabbitMqConnection:ConsumerInterval"], out var consumerInterval) ? consumerInterval : 10
+            });
+            services.AddSingleton<IConfigurationReader, ConfigurationReader>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

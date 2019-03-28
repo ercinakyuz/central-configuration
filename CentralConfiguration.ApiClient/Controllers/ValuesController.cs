@@ -1,6 +1,7 @@
 ﻿using CentralConfiguration.Core;
+using CentralConfiguration.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CentralConfiguration.ApiClient.Controllers
 {
@@ -10,9 +11,9 @@ namespace CentralConfiguration.ApiClient.Controllers
     {
         private readonly IConfigurationReader _configurationReader;
 
-        public ValuesController()
+        public ValuesController(IConfigurationReader configurationReader)
         {
-            _configurationReader = new ConfigurationReader();
+            _configurationReader = configurationReader;
         }
         [HttpGet]
         public ActionResult Get(string key, string type)

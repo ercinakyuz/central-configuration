@@ -8,13 +8,14 @@ namespace CentralConfiguration.MessageBroker
         private static readonly string HostName = "localhost";
         private static ConnectionFactory _connectionFactory;
         private static IConnection _connection;
-        public static IConnection GetRabbitMqConnection(IConfiguration configuration)
+
+        public static IConnection GetRabbitMqConnection(string host)
         {
             if (_connectionFactory == null)
             {
                 _connectionFactory = new ConnectionFactory
                 {
-                    HostName = configuration["RabbitMqConnection:Host"] ?? HostName
+                    HostName = host ?? HostName
                 };
 
             }
