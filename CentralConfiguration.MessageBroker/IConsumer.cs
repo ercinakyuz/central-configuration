@@ -2,7 +2,7 @@
 {
     public interface IConsumer<out T>
     {
-        string Host { get; set; }
+        void Initialize(string connectionString);
         T GetModelInQueue(QueueDeclaration declaration);
     }
 }

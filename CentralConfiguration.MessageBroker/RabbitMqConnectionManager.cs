@@ -1,23 +1,21 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
 using RabbitMQ.Client;
 
 namespace CentralConfiguration.MessageBroker
 {
     public class RabbitMqConnectionManager
     {
-        private static readonly string HostName = "localhost";
         private static ConnectionFactory _connectionFactory;
         private static IConnection _connection;
 
-        public static IConnection GetRabbitMqConnection(string host)
+        public static IConnection GetRabbitMqConnection(string connnectionString)
         {
             if (_connectionFactory == null)
             {
                 _connectionFactory = new ConnectionFactory
                 {
-                    HostName = host ?? HostName
+                    Uri = new Uri(connnectionString)
                 };
-
             }
             return _connection ?? (_connection = _connectionFactory.CreateConnection());
         }

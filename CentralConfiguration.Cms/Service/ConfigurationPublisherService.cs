@@ -23,7 +23,7 @@ namespace CentralConfiguration.Cms.Service
         public ConfigurationPublisherService(IRepository<Configuration, string> configurationRepository, IPublisher<IList<ConfigurationDto>> publisher, IConfiguration configuration)
         {
             _publisher = publisher;
-            _publisher.Host = configuration["RabbitMqConnection:Host"];
+            _publisher.Initialize(configuration["RabbitMqConnection:ConnectionString"]);
             _configurationRepository = configurationRepository;
             if (!int.TryParse(configuration["RabbitMqConnection:PublisherInterval"], out _publisherInterval))
             {

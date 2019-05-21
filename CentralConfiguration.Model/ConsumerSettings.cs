@@ -5,6 +5,6 @@
         public string ApplicationName { get; set; }
         public int ConsumerInterval { get; set; }
         public string LocalSettingsPath { get; set; }
-        public string ConsumerHost { get; set; }
+        public string ConsumerConnStr { get; set; }
     }
 }

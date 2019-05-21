@@ -26,7 +26,7 @@ namespace CentralConfiguration.ApiClient
             services.AddSingleton(typeof(IConsumer<>), typeof(RabbitMqConsumer<>));
             services.AddSingleton(new ConsumerSettings
             {
-                ConsumerHost = Configuration["RabbitMqConnection:Host"],
+                ConsumerConnStr = Configuration["RabbitMqConnection:ConnectionString"],
                 ApplicationName = Configuration["AppSettings:ApplicationName"],
                 LocalSettingsPath = Configuration["AppSettings:LocalSettingsPath"],
                 ConsumerInterval = int.TryParse(Configuration["RabbitMqConnection:ConsumerInterval"], out var consumerInterval) ? consumerInterval : 10

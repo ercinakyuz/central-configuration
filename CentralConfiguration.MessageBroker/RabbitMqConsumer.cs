@@ -6,15 +6,16 @@ namespace CentralConfiguration.MessageBroker
 {
     public class RabbitMqConsumer<T> : IConsumer<T>
     {
-        private readonly IModel _channel;
-        public string Host { get; set; }
+        private IModel _channel;
 
         public RabbitMqConsumer()
         {
-            var connection = RabbitMqConnectionManager.GetRabbitMqConnection(Host);
+        }
+        public void Initialize(string connectionString)
+        {
+            var connection = RabbitMqConnectionManager.GetRabbitMqConnection(connectionString);
             _channel = connection.CreateModel();
         }
-
         public T GetModelInQueue(QueueDeclaration declaration)
         {
             var model = default(T);

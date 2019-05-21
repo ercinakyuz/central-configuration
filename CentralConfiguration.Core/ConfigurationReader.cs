@@ -21,7 +21,7 @@ namespace CentralConfiguration.Core
         public ConfigurationReader(ConsumerSettings consumerSettings, IConsumer<IList<ConfigurationDto>> consumer)
         {
             _consumer = consumer;
-            _consumer.Host = consumerSettings.ConsumerHost;
+            _consumer.Initialize(consumerSettings.ConsumerConnStr);
             _consumerSettings = consumerSettings;
             if (_consumerTask == null)
             {
