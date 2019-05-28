@@ -1,0 +1,36 @@
+version: '2'
+
+services:
+
+   mongodb_img:
+      image: mongo:latest
+      container_name: "mongodb"
+      ports:
+         - 27017:27017
+
+   rabbitmq_img:
+      image: "rabbitmq:3-management"
+      container_name: "rabbitmq"
+      environment:
+         RABBITMQ_DEFAULT_USER: "rabbitmq"
+         RABBITMQ_DEFAULT_PASS: "rabbitmq"
+      ports:
+         - "15672:15672"
+         - "5672:5672"
+
+   central-configuration.cms_img:
+      image: central-configuration.cms:latest
+      container_name: "central-configuration.cms"
+      depends_on:
+         - "mongodb_img"
+         - "rabbitmq_img"
+      ports:
+         - 15400:80
+
+   central-configuration.apiclient_img:
+      image: central-configuration.apiclient:latest
+      container_name: "central-configuration.apiclient"
+      depends_on:
+         - "rabbitmq_img"
+      ports:
+         - 25400:80
