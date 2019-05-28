@@ -25,7 +25,7 @@ services:
          - "mongodb_img"
          - "rabbitmq_img"
       ports:
-         - 15400:80
+         - 54654:80
 
    central-configuration.apiclient_img:
       image: central-configuration.apiclient:latest
@@ -33,4 +33,4 @@ services:
       depends_on:
          - "rabbitmq_img"
       ports:
-         - 25400:80
+         - 14587:80
